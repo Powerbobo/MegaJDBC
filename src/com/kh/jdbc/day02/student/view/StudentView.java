@@ -2,8 +2,8 @@ package com.kh.jdbc.day02.student.view;
 
 import java.util.*;
 
-import com.kh.jdbc.day01.student.controller.StudentController;
-import com.kh.jdbc.day01.student.model.vo.Student;
+import com.kh.jdbc.day02.student.controller.StudentController;
+import com.kh.jdbc.day02.student.model.vo.Student;
 
 public class StudentView {
 	
