@@ -47,9 +47,9 @@ public class StudentDAO {
 			sList = new ArrayList<Student>();
 			while(rset.next()) {
 				student = new Student();
-				student.setStudentId(rset.getString("Student_ID"));
-				student.setStudentPwd(rset.getString("Student_PWD"));
-				student.setStudentName(rset.getString("Student_NAME"));
+				student.setStudentId(rset.getString("STUDENT_ID"));
+				student.setStudentPwd(rset.getString("STUDENT_PWD"));
+				student.setStudentName(rset.getString("STUDENT_NAME"));
 				// 문자는 문자열에서 문자로 잘라서 사용, chatAt() 메소드 사용
 				student.setGender(rset.getString("GENDER").charAt(0));
 				student.setAge(rset.getInt("AGE"));
