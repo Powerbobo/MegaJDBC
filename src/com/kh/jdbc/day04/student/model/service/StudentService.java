@@ -13,14 +13,20 @@ public class StudentService {
 	
 	public StudentService() {
 		sDao = new StudentDAO();
-//		jdbcTemplate = new JDBCTemplate();	// 생성자가 private이기 때문에 사용 못함!
+//		jdbcTemplate = new JDBCTemplate();	// 생성자가 private이기 때문에 사용 못
 		jdbcTemplate = JDBCTemplate.getInstance();
 	}
 
 	public List<Student> selectAll() {
-		Connection conn = jdbcTemplate.createConnection();
-		List<Student> sList = sDao.selectAll(conn);
-		jdbcTemplate.close();
+		List<Student> sList = null;
+		try {
+			Connection conn = jdbcTemplate.createConnection();
+			sList = sDao.selectAll(conn);
+			jdbcTemplate.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return sList;
 	}
 
@@ -38,16 +44,16 @@ public class StudentService {
 		return sList;
 	}
 
-	public int deleteStudent(String studentId) {
-		Connection conn = jdbcTemplate.createConnection();
-		int result = sDao.deleteStudent(conn, studentId);
-		jdbcTemplate.close();
-		return result;
-	}
 
 	public int insertStudent(Student student) {
 		Connection conn = jdbcTemplate.createConnection();
-		int result = sDao.insertStudent(conn, student);
+		int result = sDao.insertStudent(conn, student);	// 인서트
+		result = sDao.updateStduent(conn, student);		// 업데이트
+		if(result > 0) {	// 인서트와 업데이트 둘 다 성공했을 때 커밋될 수 있도록 작성
+			JDBCTemplate.commit(conn);
+		} else {
+			JDBCTemplate.rollback(conn);
+		}
 		jdbcTemplate.close();
 		return result;
 	}
@@ -55,6 +61,23 @@ public class StudentService {
 	public int updateStduent(Student student) {
 		Connection conn = jdbcTemplate.createConnection();
 		int result = sDao.updateStduent(conn, student);
+		if(result > 0) {
+			JDBCTemplate.commit(conn);
+		} else {
+			JDBCTemplate.rollback(conn);
+		}
+		jdbcTemplate.close();
+		return result;
+	}
+
+	public int deleteStudent(String studentId) {
+		Connection conn = jdbcTemplate.createConnection();
+		int result = sDao.deleteStudent(conn, studentId);
+		if(result > 0) {
+			JDBCTemplate.commit(conn);
+		} else {
+			JDBCTemplate.rollback(conn);
+		}
 		jdbcTemplate.close();
 		return result;
 	}

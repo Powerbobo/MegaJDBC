@@ -1,11 +1,38 @@
 package com.kh.jdbc.day04.student.model.dao;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.*;
 import java.util.*;
 
 import com.kh.jdbc.day04.student.model.vo.Student;
 
 public class StudentDAO {
+	
+	/*
+	 * 1. Checked Exception 과 Unchecked Exception
+	 * 2. 예외의 종류 Throwable - Exception(checked exception 한정)
+	 * 3. 예외처리 방법 : throws, try ~ catch
+	 * 
+	 */
+	
+	private Properties prop;
+	
+	public StudentDAO() {
+		prop = new Properties();
+		Reader reader;
+		try {
+			reader = new FileReader("resources/query.properties");
+			prop.load(reader);	// load() -> 파일을 읽는 메소드(InputStream)
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/*
 	 * 1. Statement
 	 * - createStatement() 메소드를 통해서 객체 생성
@@ -26,40 +53,48 @@ public class StudentDAO {
 	 */
 	
 	// 전체 데이터 조회
-	public List<Student> selectAll(Connection conn) {	// 연결부인 conn 을 매개변수로 넣기
-		String query = "SELECT * FROM STUDENT_TBL";
+	public List<Student> selectAll(Connection conn) throws SQLException {	// 연결부인 conn 을 매개변수로 넣기
+		String query = prop.getProperty("selectAll");
 		Statement stmt = null;
 		ResultSet rset = null;
 		List<Student> sList = null;
-
-		try {
+		
 			stmt = conn.createStatement();
 			rset = stmt.executeQuery(query);
-			// // 객체 생성 타이밍은 크게 상관없음. 다만, 이렇게 생성하면 메모리 조금이라도 줄임
+			//객체 생성 타이밍은 크게 상관없음. 다만, 이렇게 생성하면 메모리 조금이라도 줄임
 			sList = new ArrayList<Student>();
 			// 후처리
 			while (rset.next()) {
 				Student student = rsetToStudent(rset);
 				sList.add(student);
 			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				rset.close();
-				stmt.close();
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
+			
+//			try {
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			// Unreachable catch block for FileNotFoundException. 
+//			// It is already handled by the catch block for Exception
+//			// ==> Exception 은 모든 Exception의 부모여서 위에 Exception 을 써버리면
+//			// 아래에는 다른 예외처리를 할 수 없다.
+//			// 예외처리를 세세하게 설정할 수 없지만, Exception 하나로 모든 예외처리를 퉁 칠수도 있음
+//			
+////		} catch (FileNotFoundException e) {
+////			// TODO Auto-generated catch block
+////			e.printStackTrace();
+//		}finally {
+//			try {
+//				rset.close();
+//				stmt.close();
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
+//		}
 		return sList;
 	}
 
 	// 아이디로 데이터 조회
 	public Student selectOneById(Connection conn, String studentId) {
-		String query = "SELECT * FROM STUDENT_TBL WHERE STUDENT_ID = ?";
+		String query = prop.getProperty("selectOneById");
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		Student student = null;
@@ -79,7 +114,6 @@ public class StudentDAO {
 			try {
 				rset.close();
 				pstmt.close();
-				conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -89,7 +123,7 @@ public class StudentDAO {
 
 	// 이름으로 데이터 조회
 	public List<Student> selectAllByName(Connection conn, String studentName) {
-		String query = "SELECT * FROM STUDENT_TBL WHERE STUDENT_NAME = ?";
+		String query = prop.getProperty("selectAllByName");
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		List<Student> sList = null;
@@ -111,7 +145,6 @@ public class StudentDAO {
 			try {
 				rset.close();
 				pstmt.close();
-				conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -121,7 +154,7 @@ public class StudentDAO {
 
 	// 데이터 등록
 	public int insertStudent(Connection conn, Student student) {
-		String query = "INSERT INTO STUDENT_TBL VALUES(?,?,?,?,?,?,?,?,?,SYSDATE)";
+		String query = prop.getProperty("insertStudent");
 		PreparedStatement pstmt = null;
 		int result = 0;
 		try {
@@ -142,7 +175,6 @@ public class StudentDAO {
 		} finally {
 			try {
 				pstmt.close();
-				conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -152,7 +184,7 @@ public class StudentDAO {
 
 	// 데이터 수정
 	public int updateStduent(Connection conn, Student student) {
-		String query = "UPDATE STUDENT_TBL SET STUDENT_PWD = ?, EMAIL = ?, PHONE = ?, ADDRESS = ?, HOBBY = ? WHERE STUDENT_ID = ?";
+		String query = prop.getProperty("updateStduent");
 		PreparedStatement pstmt = null;
 		int result = 0;
 		try {
@@ -170,7 +202,6 @@ public class StudentDAO {
 		} finally {
 			try {
 				pstmt.close();
-				conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -180,7 +211,7 @@ public class StudentDAO {
 
 	// 데이터 삭제
 	public int deleteStudent(Connection conn, String studentId) {
-		String query = "DELETE FROM STUDENT_TBL WHERE STUDENT_ID = ?";
+		String query = prop.getProperty("deleteStudent");
 		PreparedStatement pstmt = null;
 		int result = 0;
 		try {
@@ -193,7 +224,6 @@ public class StudentDAO {
 		} finally {
 			try {
 				pstmt.close();
-				conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
